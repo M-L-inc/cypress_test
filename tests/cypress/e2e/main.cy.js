@@ -153,4 +153,79 @@ describe('マーケティング自動化管理', () => {
             cy.get('#drafts.email-tab-content.active').should('be.visible').and('contain', '下書きメールが表示されます。');
         });
     });
+
+    describe('ダッシュボードの要素', () => {
+        it('統計カードの値を確認する', () => {
+            cy.get('.stat-card').should('have.length', 4);
+            cy.get('.stat-card').eq(0).within(() => {
+                cy.get('.stat-value').should('have.text', '2,845');
+                cy.get('.stat-label').should('have.text', '送信メール');
+            });
+            cy.get('.stat-card').eq(1).within(() => {
+                cy.get('.stat-value').should('have.text', '12');
+                cy.get('.stat-label').should('have.text', 'アクティブセグメント');
+            });
+            cy.get('.stat-card').eq(2).within(() => {
+                cy.get('.stat-value').should('have.text', '8');
+                cy.get('.stat-label').should('have.text', '実行中キャンペーン');
+            });
+            cy.get('.stat-card').eq(3).within(() => {
+                cy.get('.stat-value').should('have.text', '24');
+                cy.get('.stat-label').should('have.text', '自動化フロー');
+            });
+        });
+    });
+
+    describe('スケジューラ', () => {
+        beforeEach(() => {
+            cy.get('.nav-item[data-tab="scheduler"]').click();
+        });
+
+        it('カレンダーに予定が表示されている', () => {
+            cy.get('.day.scheduled').should('have.length', 3);
+            cy.get('.day.scheduled').eq(0).should('contain', 'ニュースレター');
+            cy.get('.day.scheduled').eq(1).should('contain', 'セール告知');
+            cy.get('.day.scheduled').eq(2).should('contain', 'ウェルカム');
+        });
+    });
+
+    describe('レスポンシブデザイン', () => {
+        it('モバイルビューでサイドバーが折りたたまれる', () => {
+            cy.viewport(768, 800);
+            cy.get('.sidebar').should('have.css', 'width', '70px');
+            cy.get('.nav-item span').should('not.be.visible');
+        });
+
+        it('デスクトップビューでサイドバーが展開される', () => {
+            cy.viewport(1280, 800);
+            cy.get('.sidebar').should('have.css', 'width', '260px');
+            cy.get('.nav-item span').should('be.visible');
+        });
+    });
+    
+    describe('モーダルフォームの入力', () => {
+        beforeEach(() => {
+            cy.get('#new-action').click();
+        });
+
+        it('メールテンプレートフォームに入力できる', () => {
+            cy.get('#action-type').select('email');
+            cy.get('#email-form').should('be.visible');
+            cy.get('#email-form input[type="text"]').first().type('新しいニュースレター');
+            cy.get('#email-form input[type="text"]').last().type('【速報】新機能リリース！');
+
+            cy.get('#email-form input[type="text"]').first().should('have.value', '新しいニュースレター');
+            cy.get('#email-form input[type="text"]').last().should('have.value', '【速報】新機能リリース！');
+        });
+
+        it('セグメントフォームに入力できる', () => {
+            cy.get('#action-type').select('segment');
+            cy.get('#segment-form').should('be.visible');
+            cy.get('#segment-form input[type="text"]').type('テストセグメント');
+            cy.get('#segment-form select').select('メール開封率 > 50%');
+
+            cy.get('#segment-form input[type="text"]').should('have.value', 'テストセグメント');
+            cy.get('#segment-form select').should('have.value', 'メール開封率 > 50%');
+        });
+    });
 });
