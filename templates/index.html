@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マーケティング自動化管理</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --sidebar: #1e293b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar);
+            color: #cbd5e1;
+            padding: 1.5rem 0;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+        }
+        .logo {
+            padding: 0 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .nav-item.active {
+            background: rgba(67,97,238,0.2);
+            color: white;
+            border-left-color: var(--primary);
+        }
+        .nav-item i { width: 20px; text-align: center; }
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .btn-outline:hover {
+            background: rgba(67,97,238,0.1);
+        }
+        .card {
+            background: var(--card);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--card);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+        }
+        .stat-icon.email { background: #3b82f6; }
+        .stat-icon.segments { background: #10b981; }
+        .stat-icon.campaigns { background: #f59e0b; }
+        .stat-icon.automation { background: #8b5cf6; }
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+        .stat-label {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 1px solid var(--border);
+        }
+        .table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .table tr:hover {
+            background: #f8fafc;
+        }
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge.success { background: #d1fae5; color: #065f46; }
+        .badge.warning { background: #fef3c7; color: #92400e; }
+        .badge.danger { background: #fee2e2; color: #991b1b; }
+        .badge.info { background: #dbeafe; color: #1e40af; }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67,97,238,0.1);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-body {
+            padding: 1.5rem;
+        }
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+        }
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+        .scheduler {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .day {
+            padding: 1rem;
+            text-align: center;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .day:hover {
+            background: #f1f5f9;
+        }
+        .day.scheduled {
+            background: rgba(67,97,238,0.1);
+            border-color: var(--primary);
+        }
+        .day-header {
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                padding: 1rem 0;
+            }
+            .logo span, .nav-item span {
+                display: none;
+            }
+            .nav-item {
+                justify-content: center;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- サイドメニュー -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-robot"></i>
+            <span>MA Admin</span>
+        </div>
+        <nav>
+            <div class="nav-item active" data-tab="dashboard">
+                <i class="fas fa-home"></i>
+                <span>ダッシュボード</span>
+            </div>
+            <div class="nav-item" data-tab="emails">
+                <i class="fas fa-envelope"></i>
+                <span>メール管理</span>
+            </div>
+            <div class="nav-item" data-tab="segments">
+                <i class="fas fa-users"></i>
+                <span>セグメント管理</span>
+            </div>
+            <div class="nav-item" data-tab="scheduler">
+                <i class="fas fa-calendar"></i>
+                <span>スケジューラ</span>
+            </div>
+            <div class="nav-item" data-tab="automation">
+                <i class="fas fa-cogs"></i>
+                <span>オートメーション</span>
+            </div>
+            <div class="nav-item" data-tab="reports">
+                <i class="fas fa-chart-bar"></i>
+                <span>レポート</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <div class="header">
+            <h1 id="page-title">ダッシュボード</h1>
+            <button class="btn btn-primary" id="new-action">
+                <i class="fas fa-plus"></i>
+                新規作成
+            </button>
+        </div>
+
+        <!-- ダッシュボード -->
+        <div id="dashboard" class="tab-content active">
+            <div class="grid">
+                <div class="stat-card">
+                    <div class="stat-icon email">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">2,845</div>
+                        <div class="stat-label">送信メール</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon segments">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">アクティブセグメント</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon campaigns">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">実行中キャンペーン</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon automation">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">24</div>
+                        <div class="stat-label">自動化フロー</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>最近のアクティビティ</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>アクション</th>
+                            <th>対象</th>
+                            <th>時間</th>
+                            <th>ステータス</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>メール送信</td>
+                            <td>ニュースレター #45</td>
+                            <td>5分前</td>
+                            <td><span class="badge success">完了</span></td>
+                        </tr>
+                        <tr>
+                            <td>セグメント更新</td>
+                            <td>プレミアムユーザー</td>
+                            <td>12分前</td>
+                            <td><span class="badge success">完了</span></td>
+                        </tr>
+                        <tr>
+                            <td>自動化開始</td>
+                            <td>ウェルカムシリーズ</td>
+                            <td>1時間前</td>
+                            <td><span class="badge info">実行中</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- メール管理 -->
+        <div id="emails" class="tab-content">
+            <div class="card">
+                <div class="tabs">
+                    <div class="tab active" data-email-tab="templates">テンプレート</div>
+                    <div class="tab" data-email-tab="sent">送信済み</div>
+                    <div class="tab" data-email-tab="drafts">下書き</div>
+                </div>
+
+                <div id="templates" class="email-tab-content active">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>テンプレート名</th>
+                                <th>件名</th>
+                                <th>最終更新</th>
+                                <th>使用回数</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ニュースレター</td>
+                                <td>今週の最新情報</td>
+                                <td>2025/11/12</td>
+                                <td>156</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">編集</button>
+                                    <button class="btn btn-outline btn-sm">複製</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ウェルカムメール</td>
+                                <td>ようこそ！</td>
+                                <td>2025/11/10</td>
+                                <td>89</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">編集</button>
+                                    <button class="btn btn-outline btn-sm">複製</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="sent" class="email-tab-content">
+                    <p>送信済みメールの履歴が表示されます。</p>
+                </div>
+
+                <div id="drafts" class="email-tab-content">
+                    <p>下書きメールが表示されます。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- セグメント管理 -->
+        <div id="segments" class="tab-content">
+            <div class="card">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>セグメント名</th>
+                            <th>条件</th>
+                            <th>ユーザー数</th>
+                            <th>作成日</th>
+                            <th>ステータス</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>プレミアムユーザー</td>
+                            <td>プラン = プレミアム</td>
+                            <td>1,234</td>
+                            <td>2025/10/15</td>
+                            <td><span class="badge success">アクティブ</span></td>
+                            <td>
+                                <button class="btn btn-outline btn-sm">編集</button>
+                                <button class="btn btn-outline btn-sm">削除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>最近購入者</td>
+                            <td>購入日 &gt; 7日前</td>
+                            <td>456</td>
+                            <td>2025/11/01</td>
+                            <td><span class="badge success">アクティブ</span></td>
+                            <td>
+                                <button class="btn btn-outline btn-sm">編集</button>
+                                <button class="btn btn-outline btn-sm">削除</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- スケジューラ -->
+        <div id="scheduler" class="tab-content">
+            <div class="card">
+                <h3>2025年11月 カレンダー</h3>
+                <div class="scheduler">
+                    <div class="day-header">日</div>
+                    <div class="day-header">月</div>
+                    <div class="day-header">火</div>
+                    <div class="day-header">水</div>
+                    <div class="day-header">木</div>
+                    <div class="day-header">金</div>
+                    <div class="day-header">土</div>
+                    
+                    <div class="day"></div>
+                    <div class="day"></div>
+                    <div class="day"></div>
+                    <div class="day"></div>
+                    <div class="day"></div>
+                    <div class="day"></div>
+                    <div class="day">1</div>
+                    
+                    <div class="day">2</div>
+                    <div class="day">3</div>
+                    <div class="day scheduled">4<br><small>ニュースレター</small></div>
+                    <div class="day">5</div>
+                    <div class="day scheduled">6<br><small>セール告知</small></div>
+                    <div class="day">7</div>
+                    <div class="day">8</div>
+                    
+                    <div class="day">9</div>
+                    <div class="day">10</div>
+                    <div class="day">11</div>
+                    <div class="day scheduled">12<br><small>ウェルカム</small></div>
+                    <div class="day">13</div>
+                    <div class="day">14</div>
+                    <div class="day">15</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- オートメーション -->
+        <div id="automation" class="tab-content">
+            <div class="card">
+                <h3>アクティブな自動化フロー</h3>
+                <div style="margin: 2rem 0; position: relative; height: 300px; border: 1px dashed #cbd5e1; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                    <div style="text-align: center;">
+                        <i class="fas fa-project-diagram" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <p>ドラッグ＆ドロップでフローを構築</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- レポート -->
+        <div id="reports" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h3>メールパフォーマンス</h3>
+                    <div style="height: 200px; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                        開封率: 34.2% | クリック率: 12.8%
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>コンバージョン</h3>
+                    <div style="height: 200px; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                        合計コンバージョン: 892
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- モーダル -->
+    <div class="modal" id="action-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">新規作成</h3>
+                <button class="btn btn-outline" id="close-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>タイプを選択</label>
+                    <select class="form-control" id="action-type">
+                        <option value="">選択してください</option>
+                        <option value="email">メールテンプレート</option>
+                        <option value="segment">セグメント</option>
+                        <option value="campaign">キャンペーン</option>
+                        <option value="automation">自動化フロー</option>
+                    </select>
+                </div>
+                <div id="email-form" class="action-form" style="display: none;">
+                    <div class="form-group">
+                        <label>テンプレート名</label>
+                        <input type="text" class="form-control" placeholder="例: ニュースレター">
+                    </div>
+                    <div class="form-group">
+                        <label>件名</label>
+                        <input type="text" class="form-control" placeholder="メールの件名">
+                    </div>
+                </div>
+                <div id="segment-form" class="action-form" style="display: none;">
+                    <div class="form-group">
+                        <label>セグメント名</label>
+                        <input type="text" class="form-control" placeholder="例: プレミアムユーザー">
+                    </div>
+                    <div class="form-group">
+                        <label>条件</label>
+                        <select class="form-control">
+                            <option>プラン = プレミアム</option>
+                            <option>購入日 &gt; 30日前</option>
+                            <option>メール開封率 &gt; 50%</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-modal">キャンセル</button>
+                <button class="btn btn-primary">作成</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // タブ切り替え
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                
+                item.classList.add('active');
+                const tabId = item.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+                document.getElementById('page-title').textContent = item.querySelector('span').textContent;
+            });
+        });
+
+        // メール内タブ
+        document.querySelectorAll('[data-email-tab]').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('[data-email-tab]').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.email-tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                const contentId = tab.getAttribute('data-email-tab');
+                document.getElementById(contentId).classList.add('active');
+            });
+        });
+
+        // モーダル制御
+        const modal = document.getElementById('action-modal');
+        const newActionBtn = document.getElementById('new-action');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelModalBtn = document.getElementById('cancel-modal');
+        const actionType = document.getElementById('action-type');
+
+        newActionBtn.addEventListener('click', () => {
+            modal.classList.add('active');
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        cancelModalBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        actionType.addEventListener('change', () => {
+            document.querySelectorAll('.action-form').forEach(form => {
+                form.style.display = 'none';
+            });
+            const selected = actionType.value;
+            if (selected) {
+                document.getElementById(selected + '-form').style.display = 'block';
+            }
+        });
+
+        // モーダル外クリックで閉じる
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        // レスポンシブ対応
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                document.querySelector('.logo span').style.display = 'none';
+                document.querySelectorAll('.nav-item span').forEach(span => {
+                    span.style.display = 'none';
+                });
+            } else {
+                document.querySelector('.logo span').style.display = 'block';
+                document.querySelectorAll('.nav-item span').forEach(span => {
+                    span.style.display = 'block';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
